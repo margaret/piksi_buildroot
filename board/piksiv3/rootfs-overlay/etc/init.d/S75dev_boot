@@ -1,0 +1,77 @@
+#!/bin/sh
+
+name="dev_boot"
+
+output_path="/lib/firmware"
+
+copy_from_sd() {
+  local sd_path=$1
+  local filename=$2
+  local sd_file="$sd_path/$filename"
+  local output_file="$output_path/$filename"
+
+  rm -f "$output_file"
+  echo "Copying $filename from SD card"
+  mkdir -p "$output_path"
+  cp "$sd_file" "$output_file"
+
+  if [ ! -f "$output_file" ]; then
+    echo "ERROR: copy failed"
+  fi
+}
+
+copy_from_net() {
+  local server_ip=$1
+  local filename=$2
+  local uuid=`cat /factory/uuid`
+  local net_file="PK$uuid/$filename"
+  local output_file="$output_path/$filename"
+
+  rm -f "$output_file"
+  echo "Copying $filename from network"
+  mkdir -p "$output_path"
+  tftp -g -r "$net_file" -l "$output_file" -b 65464 "$server_ip"
+
+  if [ ! -f "$output_file" ]; then
+    echo "ERROR: copy failed"
+  fi
+}
+
+start() {
+  # Get 'dev_boot' bootarg
+  dev_boot=`cat /proc/device-tree/chosen/bootargs |
+            sed -n -e 's/^.*dev_boot=\([^ ]*\).*/\1/p'`
+
+  # Delete any firmware files that were already present in the rootfs.
+  # In the dev configuration we want to obtain the firmware from the SD card or
+  # network and this ensures if these files are not available from the SD card
+  # or network we will error out rather than silently falling back to the
+  # version present in the rootfs.
+  if [ -n "$dev_boot" ]; then
+    # If dev_boot is set to something (not null), then we are in the dev
+    # configuration
+    rm -f $output_path/piksi_firmware.elf
+    rm -f $output_path/piksi_fpga.bit
+  fi
+
+  if [ "$dev_boot" == "sd" ]; then
+    sd_path="/media/mmcblk0p1"
+    copy_from_sd $sd_path "piksi_firmware.elf"
+    copy_from_sd $sd_path "piksi_fpga.bit"
+  fi
+
+  if [ "$dev_boot" == "net" ]; then
+    # Get server ip from 'ip' bootarg
+    server_ip=`cat /proc/device-tree/chosen/bootargs |
+               sed -n -e 's/^.*ip=[^:]*:\([^:]*\).*/\1/p'`
+    copy_from_net $server_ip "piksi_firmware.elf"
+    copy_from_net $server_ip "piksi_fpga.bit"
+  fi
+}
+
+stop() {
+  :
+}
+
+source /etc/init.d/template_command.inc.sh
+

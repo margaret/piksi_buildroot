@@ -9,6 +9,7 @@
 /dev					d	755	0	0	-	-	-	-	-
 /tmp					d	1777	0	0	-	-	-	-	-
 /etc					d	755	0	0	-	-	-	-	-
+/persistent				d	755	0	0	-	-	-	-	-
 /root					d	700	0	0	-	-	-	-	-
 /var/www				d	755	33	33	-	-	-	-	-
 /etc/shadow				f	600	0	0	-	-	-	-	-
@@ -23,3 +24,5 @@
 /etc/ssh/ssh_host_ecdsa_key		f	600	0	0	-	-	-	-	-
 /etc/ssh/ssh_host_ed25519_key		f	600	0	0	-	-	-	-	-
 /etc/ssh/ssh_host_rsa_key		f	600	0	0	-	-	-	-	-
+/etc/monitrc				f	600	0	0	-	-	-	-	-
+/lib/mdev/automount.sh			f	755	0	0	-	-	-	-	-

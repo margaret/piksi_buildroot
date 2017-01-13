@@ -1,0 +1,24 @@
+#!/bin/sh
+#
+# initialize factory data
+#
+
+case "$1" in
+  start)
+  # symlink mtd to /factory/mtd
+  MTD_NAME=`cat /proc/mtd | grep qspi-factory | cut -d ':' -f1`
+  mkdir -p /factory
+  ln -s /dev/$MTD_NAME /factory/mtd
+  # run factory data tool
+  factory_data_tool
+  ;;
+  stop)
+  ;;
+  restart|reload)
+  ;;
+  *)
+  echo "Usage: $0 {start|stop|restart}"
+  exit 1
+esac
+
+exit $?

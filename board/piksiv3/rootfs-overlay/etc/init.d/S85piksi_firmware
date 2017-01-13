@@ -1,0 +1,18 @@
+#!/bin/sh
+
+name="piksi_firmware"
+
+start() {
+  if [ -f "/lib/firmware/piksi_firmware.elf" ]; then
+    modprobe zynq_remoteproc
+  else
+    echo "ERROR: firmware not found"
+  fi
+}
+
+stop() {
+  rmmod zynq_remoteproc
+}
+
+source /etc/init.d/template_command.inc.sh
+

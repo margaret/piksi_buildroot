@@ -1,0 +1,4 @@
+buildroot/
+.*.sw*
+build.out
+
